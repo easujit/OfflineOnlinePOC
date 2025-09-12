@@ -28,3 +28,15 @@ localStorage.setItem('API_BASE','http://127.0.0.1:8000/api'); location.reload();
 - Offline (turn Wi‑Fi off): add notes → they queue locally in IndexedDB.
 - Back online: auto sync pushes queued writes; idempotency avoids duplicates.
 - Conflicts: If server version advanced, mutation returns `{status:'conflict'}`; the client marks the item.
+
+## Advantages in Hospital Case
+
+No downtime: App still runs during WAN outage or server reboot.
+
+No data loss: Every action goes into IndexedDB Outbox.
+
+No duplication: Server uses Idempotency-Key.
+
+Graceful sync: When back online, everything reconciles.
+
+Safe conflicts: Medical orders flagged, not overwritten.
