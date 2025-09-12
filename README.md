@@ -1,7 +1,4 @@
 # Offline/Online POC
-- `/api/sync?cursor=…` returns changes since a given timestamp
-- `/api/mutations` accepts a single mutation with **Idempotency-Key**
-
 ## Run
 
 ### 1) Install & migrate
@@ -26,14 +23,8 @@ Open http://127.0.0.1:5173 in your browser.
 localStorage.setItem('API_BASE','http://127.0.0.1:8000/api'); location.reload();
 ```
 
-## Use cases
+## Quick Testing Use cases
 - Online: add notes → they sync to Backend DB.
 - Offline (turn Wi‑Fi off): add notes → they queue locally in IndexedDB.
 - Back online: auto sync pushes queued writes; idempotency avoids duplicates.
-- Conflicts: If server version advanced, mutation returns `{status:'conflict'}`; the client marks the item so you can build a merge UI later.
-
-## Code tour
-- `server/offlinepoc/settings.py` — DRF + CORS setup, SQLite DB.
-- `server/notes/models.py` — `Note`, `Event` (change log), `Idempotency`.
-- `server/notes/views.py` — `/sync` + `/mutations` endpoints with conflict detection and idempotency.
-- `client/` — PWA with Service Worker + IndexedDB outbox and a sync loop.
+- Conflicts: If server version advanced, mutation returns `{status:'conflict'}`; the client marks the item.
