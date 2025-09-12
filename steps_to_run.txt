@@ -1,13 +1,20 @@
-Server:
+1) Install & migrate
+    cd server
+    python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
+    pip install -r requirements.txt
+    python manage.py makemigrations
+    python manage.py migrate
+    python manage.py runserver 0.0.0.0:8000
+2) Serve the client
+    cd ../client
+    python -m http.server 5173
+    Open http://127.0.0.1:5173 in your browser.
 
-1. python -m venv .venv
-2. .venv\Scripts\activate
-3. pip install -r requirements.txt
-4. python manage.py makemigrations
-5. python manage.py migrate
-6. python manage.py runserver 0.0.0.0:8000
+    The client talks to http://127.0.0.1:8000/api by default. Override via console if needed:
 
-
-Client:
-
-1. python -m http.server 5173
+localStorage.setItem('API_BASE','http://127.0.0.1:8000/api'); location.reload();
+Use cases
+    Online: add notes → they sync to Backend DB.
+    Offline (turn Wi‑Fi off): add notes → they queue locally in IndexedDB.
+    Back online: auto sync pushes queued writes; idempotency avoids duplicates.
+    Conflicts: If server version advanced, mutation returns {status:'conflict'}; the client marks the item so you can build a merge UI later.
