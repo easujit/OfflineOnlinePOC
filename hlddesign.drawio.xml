@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" version="28.2.1">
+  <diagram name="Offline-First Notes POC" id="It9oHJFAxhfNhpJCJJPJ">
+    <mxGraphModel dx="1990" dy="664" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-16" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-2" target="B4akgnJNTgKzOrOjmdS5-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-17" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-2" target="B4akgnJNTgKzOrOjmdS5-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-18" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-2" target="B4akgnJNTgKzOrOjmdS5-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-19" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-6" target="B4akgnJNTgKzOrOjmdS5-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-20" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-6" target="B4akgnJNTgKzOrOjmdS5-4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-21" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-9" target="B4akgnJNTgKzOrOjmdS5-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-22" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-9" target="B4akgnJNTgKzOrOjmdS5-11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-23" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-11" target="B4akgnJNTgKzOrOjmdS5-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-24" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-11" target="B4akgnJNTgKzOrOjmdS5-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-25" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-11" target="B4akgnJNTgKzOrOjmdS5-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-26" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-10" target="B4akgnJNTgKzOrOjmdS5-14">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-9" value="API Gateway / LB" style="rounded=1;strokeColor=#94A3B8;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-370" y="440" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-10" value="Sync Controller (/sync)" style="rounded=1;strokeColor=#94A3B8;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-430" y="600" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-11" value="Mutation Controller (/mutations)" style="rounded=1;strokeColor=#94A3B8;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-190" y="600" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-12" value="Conflict Resolver" style="rounded=1;strokeColor=#94A3B8;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="50" y="720" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-13" value="Notes DB" style="shape=cylinder3;strokeColor=#94A3B8;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-200" y="730" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-14" value="ChangeLog / Versions" style="shape=cylinder3;strokeColor=#94A3B8;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-460" y="730" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-2" value="UI (index.html, app.js)" style="rounded=1;strokeColor=#60A5FA;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-590" y="240" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-3" value="Service Worker" style="rounded=1;strokeColor=#60A5FA;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-590" y="110" width="190" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-4" value="IndexedDB - notes" style="shape=datastore;strokeColor=#60A5FA;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-340" y="240" width="190" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-5" value="IndexedDB - outbox" style="shape=datastore;strokeColor=#60A5FA;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-340" y="120" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-6" value="Sync Manager" style="rounded=1;strokeColor=#60A5FA;fillColor=#FFFFFF;" vertex="1" parent="1">
+          <mxGeometry x="-340" y="340" width="200" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="B4akgnJNTgKzOrOjmdS5-28" target="B4akgnJNTgKzOrOjmdS5-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="B4akgnJNTgKzOrOjmdS5-28" value="User" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" vertex="1" parent="1">
+          <mxGeometry x="-840" y="255" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
