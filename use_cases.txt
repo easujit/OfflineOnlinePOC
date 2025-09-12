@@ -1,0 +1,13 @@
+Server:
+
+1. python -m venv .venv
+2. .venv\Scripts\activate
+3. pip install -r requirements.txt
+4. python manage.py makemigrations
+5. python manage.py migrate
+6. python manage.py runserver 0.0.0.0:8000
+
+
+Client:
+
+1. python -m http.server 5173
