@@ -1,6 +1,4 @@
-# Offline/Online Capability POC — Django/DRF
-
-This is a Django + DRF server that matches the offline-first client (PWA) behavior:
+# Offline/Online POC
 - `/api/sync?cursor=…` returns changes since a given timestamp
 - `/api/mutations` accepts a single mutation with **Idempotency-Key**
 
@@ -11,11 +9,12 @@ This is a Django + DRF server that matches the offline-first client (PWA) behavi
 cd server
 python -m venv .venv && source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+python manage.py makemigrations
 python manage.py migrate
 python manage.py runserver 0.0.0.0:8000
 ```
 
-### 2) Serve the client (any static server)
+### 2) Serve the client
 ```bash
 cd ../client
 python -m http.server 5173
@@ -27,8 +26,8 @@ Open http://127.0.0.1:5173 in your browser.
 localStorage.setItem('API_BASE','http://127.0.0.1:8000/api'); location.reload();
 ```
 
-## Demo
-- Online: add notes → they sync to Django DB.
+## Use cases
+- Online: add notes → they sync to Backend DB.
 - Offline (turn Wi‑Fi off): add notes → they queue locally in IndexedDB.
 - Back online: auto sync pushes queued writes; idempotency avoids duplicates.
 - Conflicts: If server version advanced, mutation returns `{status:'conflict'}`; the client marks the item so you can build a merge UI later.
