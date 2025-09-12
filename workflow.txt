@@ -1,0 +1,75 @@
+Step-by-Step Workflow
+1. App Load
+
+Browser requests /index.html, /app.js, etc.
+
+Service Worker intercepts: if offline → serve from Cache.
+
+UI loads even without server.
+
+2. Read Data
+
+App first queries IndexedDB → shows cached notes instantly.
+
+If online → calls /sync to fetch new changes → updates both IndexedDB + UI.
+
+3. Write Data
+
+User adds a note:
+
+Save immediately into IndexedDB (notes table).
+
+Also add a job into Outbox ({uuid, patch, base_version}).
+
+4. Offline Mode
+
+If server unreachable:
+
+App still loads from SW cache.
+
+All writes stay in IndexedDB Outbox.
+
+Notes show as pending.
+
+5. Online/Recovery
+
+Sync loop wakes up:
+
+Pull: /sync?cursor=… → get missed changes.
+
+Push: POST each outbox job to /mutations with Idempotency-Key.
+
+Server:
+
+Saves data.
+
+Returns new version.
+
+App:
+
+Updates note status → synced.
+
+Removes job from outbox.
+
+6. Conflict
+
+If two users edit same record:
+
+Server compares base_version vs current version.
+
+If stale → returns {status:"conflict"}.
+
+Client marks note as conflict → doctor resolves manually.
+
+
+-----Advantages in Hospital Case------
+
+No downtime: App still runs during WAN outage or server reboot.
+
+No data loss: Every action goes into IndexedDB Outbox.
+
+No duplication: Server uses Idempotency-Key.
+
+Graceful sync: When back online, everything reconciles.
+
+Safe conflicts: Medical orders flagged, not overwritten.
