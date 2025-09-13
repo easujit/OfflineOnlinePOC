@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Offline Notes POC (Django)</title>
+  <title>Offline/Online POC</title>
   <link rel="manifest" href="/manifest.json">
   <style>
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; max-width: 800px; }
@@ -11,21 +11,139 @@
     .online { background: #e6ffe6; border: 1px solid #66cc66; }
     .offline { background: #fff2e6; border: 1px solid #ff9933; }
     .syncing { background: #e6f0ff; border: 1px solid #6699ff; }
-    .note { padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin: 8px 0; }
+    .notes-section { margin-top: 20px; }
+    .notes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .notes-header h2 { margin: 0; color: #333; }
+    .notes-controls { display: flex; gap: 10px; }
+    .btn-primary, .btn-secondary, .btn-danger { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
+    .btn-primary { background: #007bff; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-primary:hover { background: #0056b3; }
+    .btn-secondary:hover { background: #5a6268; }
+    .btn-danger:hover { background: #c82333; }
+    .notes-stats { margin-bottom: 15px; padding: 8px; background: #f8f9fa; border-radius: 4px; font-size: 14px; color: #666; }
+    .pagination-controls { margin-bottom: 15px; padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef; }
+    .pagination-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .pagination-info span { font-weight: 500; color: #495057; }
+    .page-size-select { padding: 4px 8px; border: 1px solid #ced4da; border-radius: 4px; background: white; font-size: 12px; }
+    .pagination-buttons { display: flex; justify-content: center; align-items: center; gap: 5px; }
+    .btn-pagination { padding: 6px 10px; border: 1px solid #ced4da; background: white; border-radius: 4px; cursor: pointer; font-size: 12px; color: #495057; }
+    .btn-pagination:hover:not(:disabled) { background: #e9ecef; border-color: #adb5bd; }
+    .btn-pagination:disabled { background: #f8f9fa; color: #6c757d; cursor: not-allowed; opacity: 0.6; }
+    .page-numbers { display: flex; gap: 3px; margin: 0 10px; }
+    .page-number { padding: 6px 10px; border: 1px solid #ced4da; background: white; border-radius: 4px; cursor: pointer; font-size: 12px; color: #495057; min-width: 32px; text-align: center; }
+    .page-number:hover { background: #e9ecef; border-color: #adb5bd; }
+    .page-number.active { background: #007bff; color: white; border-color: #007bff; }
+    .notes-list { max-height: 600px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px; padding: 10px; }
+    .note { padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin: 8px 0; background: white; }
+    .note.conflict { border-color: #ff6b6b; background-color: #fff5f5; }
+    .note:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .note-content { margin-bottom: 8px; line-height: 1.4; }
     .meta { color: #666; font-size: 12px; }
     .chip { font-size: 11px; padding: 2px 6px; border-radius: 8px; border: 1px solid #999; margin-left: 6px; }
+    .chip.conflict { background-color: #ff6b6b; color: white; border-color: #ff6b6b; }
+    .empty-state { text-align: center; padding: 40px; color: #666; font-style: italic; }
+    
+    /* Tab Styling */
+    .tab-navigation { margin: 20px 0; border-bottom: 2px solid #e9ecef; }
+    .tab-button { 
+      padding: 12px 24px; 
+      background: none; 
+      border: none; 
+      border-bottom: 3px solid transparent; 
+      cursor: pointer; 
+      font-size: 14px; 
+      font-weight: 500; 
+      color: #6c757d; 
+      transition: all 0.3s ease;
+      margin-right: 10px;
+    }
+    .tab-button:hover { 
+      color: #495057; 
+      background-color: #f8f9fa; 
+      border-radius: 6px 6px 0 0;
+    }
+    .tab-button.active { 
+      color: #007bff; 
+      border-bottom-color: #007bff; 
+      background-color: #f8f9fa;
+      border-radius: 6px 6px 0 0;
+    }
+    .tab-content { margin-top: 20px; }
+    .tab-panel { 
+      display: none; 
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .tab-panel.active { 
+      display: block; 
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
-  <h1>Offline-First Notes (Django/DRF POC)</h1>
+  <h1>Offline/Online Notes</h1>
   <div id="net" class="status">Detecting network…</div>
-  <form id="noteForm">
-    <input id="title" placeholder="Title" required style="width: 40%; padding: 8px">
-    <input id="content" placeholder="Write a note" required style="width: 50%; padding: 8px">
-    <button type="submit">Save</button>
-  </form>
-  <p class="meta">Toggle Wi‑Fi off/on to see offline queueing + sync.</p>
-  <div id="list"></div>
+  
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button class="tab-button active" data-tab="create">✏️ Create Note</button>
+    <button class="tab-button" data-tab="notes">📋 All Notes</button>
+  </div>
+  
+  <!-- Tab Content -->
+  <div class="tab-content">
+    <!-- Create Note Tab -->
+    <div id="create-tab" class="tab-panel active">
+      <form id="noteForm">
+        <input id="title" placeholder="Title" required style="width: 40%; padding: 8px">
+        <input id="content" placeholder="Write a note" required style="width: 50%; padding: 8px">
+        <button type="submit">Save</button>
+      </form>
+      <p class="meta">Toggle Wi‑Fi off/on to see offline queueing + sync.</p>
+    </div>
+    
+    <!-- All Notes Tab -->
+    <div id="notes-tab" class="tab-panel">
+      <div class="notes-section">
+        <div class="notes-header">
+          <h2>All Notes</h2>
+          <div class="notes-controls">
+            <button id="fetchFromServer" class="btn-primary">📥 Fetch from Server</button>
+            <button id="refreshNotes" class="btn-secondary">🔄 Refresh Local</button>
+            <button id="clearAllNotes" class="btn-danger">🗑️ Clear All</button>
+          </div>
+        </div>
+        <div class="notes-stats">
+          <span id="notesCount">Loading...</span>
+        </div>
+        <div class="pagination-controls">
+          <div class="pagination-info">
+            <span id="paginationInfo">Page 1 of 1</span>
+            <select id="pageSize" class="page-size-select">
+              <option value="5" selected>5 per page</option>
+              <option value="10">10 per page</option>
+              <option value="25">25 per page</option>
+              <option value="50">50 per page</option>
+              <option value="100">100 per page</option>
+            </select>
+          </div>
+          <div class="pagination-buttons">
+            <button id="firstPage" class="btn-pagination" disabled>⏮️ First</button>
+            <button id="prevPage" class="btn-pagination" disabled>⬅️ Previous</button>
+            <span id="pageNumbers" class="page-numbers"></span>
+            <button id="nextPage" class="btn-pagination" disabled>Next ➡️</button>
+            <button id="lastPage" class="btn-pagination" disabled>Last ⏭️</button>
+          </div>
+        </div>
+        <div id="list" class="notes-list"></div>
+      </div>
+    </div>
+  </div>
 
   <script src="/idb.js"></script>
   <script src="/app.js" type="module"></script>

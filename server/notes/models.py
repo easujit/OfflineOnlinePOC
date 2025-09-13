@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils import timezone
+from django.utils.timezone import now
 
 class Note(models.Model):
     id = models.CharField(primary_key=True, max_length=64)
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
     version = models.IntegerField(default=0)
-    updated_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(default=now)
 
     def to_change(self):
         return {
@@ -27,4 +28,4 @@ class Event(models.Model):
     entity_id = models.CharField(max_length=64)
     op = models.CharField(max_length=16)
     version = models.IntegerField()
-    updated_at = models.DateTimeField()
+    updated_at = models.DateTimeField(default=now)

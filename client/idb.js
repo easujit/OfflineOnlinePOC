@@ -1,5 +1,5 @@
 // IndexedDB helper
-export function withDB(name='offlinepoc', version=1) {
+export function withDB(name='offon', version=1) {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(name, version);
     req.onupgradeneeded = (e) => {
