@@ -1,4 +1,4 @@
-import { withDB, tx } from './idb.js';
+import { withDB, tx, storage } from './idb.js';
 
 const API_BASE = (localStorage.getItem('API_BASE') || 'http://127.0.0.1:8000/api').replace(/\/$/, '');
 const netEl = document.getElementById('net');
@@ -84,30 +84,35 @@ async function render() {
 }
 
 async function renderLocalNotes() {
-  const db = await withDB();
-  const t = await tx(db, ['notes'], 'readonly');
-  const store = t.objectStore('notes');
-  const req = store.index('updated_at').getAll();
-  const allNotes = await new Promise((res, rej) => { req.onsuccess = () => res(req.result.reverse()); req.onerror = () => rej(req.error); });
-  
-  // Calculate pagination
-  totalNotes = allNotes.length;
-  totalPages = Math.ceil(totalNotes / pageSize);
-  currentPage = Math.min(currentPage, Math.max(1, totalPages));
-  
-  // Get notes for current page
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  currentNotes = allNotes.slice(startIndex, endIndex);
-  
-  // Update pagination UI
-  updatePaginationUI();
-  
-  // Update notes count
-  updateNotesCount(allNotes);
-  
-  // Render notes
-  renderNotesList(currentNotes);
+  try {
+    // Use enhanced storage with filtering
+    const allNotes = await storage.getNotes({
+      limit: null // Get all notes for pagination calculation
+    });
+    
+    // Calculate pagination
+    totalNotes = allNotes.length;
+    totalPages = Math.ceil(totalNotes / pageSize);
+    currentPage = Math.min(currentPage, Math.max(1, totalPages));
+    
+    // Get notes for current page
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    currentNotes = allNotes.slice(startIndex, endIndex);
+    
+    // Update pagination UI
+    updatePaginationUI();
+    
+    // Update notes count
+    updateNotesCount(allNotes);
+    
+    // Render notes
+    renderNotesList(currentNotes);
+    
+  } catch (error) {
+    console.error('Error rendering local notes:', error);
+    listEl.innerHTML = '<div class="empty-state">Error loading notes from storage. Please try again.</div>';
+  }
 }
 
 async function renderServerNotes() {
@@ -171,7 +176,7 @@ function renderNotesList(notes) {
   });
 }
 
-function updateNotesCount(notes) {
+async function updateNotesCount(notes) {
   if (!notesCountEl) return;
   
   const total = notes.length;
@@ -183,6 +188,14 @@ function updateNotesCount(notes) {
   if (synced < total) countText += ` • Synced: ${synced}`;
   if (pending > 0) countText += ` • Pending: ${pending}`;
   if (conflicts > 0) countText += ` • Conflicts: ${conflicts}`;
+  
+  // Add storage info
+  try {
+    const storageInfo = await storage.getStorageInfo();
+    countText += ` • Storage: ${storageInfo.total} items`;
+  } catch (error) {
+    console.error('Error getting storage info:', error);
+  }
   
   notesCountEl.textContent = countText;
 }
@@ -304,15 +317,23 @@ async function fetchNotesFromServer() {
 }
 
 async function saveLocal(note) {
-  const db = await withDB();
-  const t = await tx(db, ['notes'], 'readwrite');
-  await new Promise((res, rej) => { const r = t.objectStore('notes').put(note); r.onsuccess = () => res(); r.onerror = () => rej(r.error); });
+  try {
+    await storage.saveNote(note);
+    console.log('Note saved to persistent storage:', note.id);
+  } catch (error) {
+    console.error('Error saving note to storage:', error);
+    throw error;
+  }
 }
 
 async function addToOutbox(job) {
-  const db = await withDB();
-  const t = await tx(db, ['outbox'], 'readwrite');
-  await new Promise((res, rej) => { const r = t.objectStore('outbox').put(job); r.onsuccess = () => res(); r.onerror = () => rej(r.error); });
+  try {
+    await storage.addToOutbox(job);
+    console.log('Job added to outbox:', job.uuid);
+  } catch (error) {
+    console.error('Error adding job to outbox:', error);
+    throw error;
+  }
 }
 
 function uuid() { return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c => (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)); }
@@ -348,39 +369,69 @@ form.addEventListener('submit', async (e) => {
 });
 
 async function getAll(storeName) {
-  const db = await withDB();
-  const t = await tx(db, [storeName], 'readonly');
-  return await new Promise((res, rej) => {
-    const r = t.objectStore(storeName).getAll();
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  });
+  try {
+    if (storeName === 'outbox') {
+      return await storage.getOutbox();
+    } else {
+      // Fallback to original method for other stores
+      const db = await withDB();
+      const t = await tx(db, [storeName], 'readonly');
+      return await new Promise((res, rej) => {
+        const r = t.objectStore(storeName).getAll();
+        r.onsuccess = () => res(r.result);
+        r.onerror = () => rej(r.error);
+      });
+    }
+  } catch (error) {
+    console.error(`Error getting all ${storeName}:`, error);
+    throw error;
+  }
 }
 
 async function deleteOutboxKey(uuid) {
-  const db = await withDB();
-  const t = await tx(db, ['outbox'], 'readwrite');
-  await new Promise((res, rej) => { const r = t.objectStore('outbox').delete(uuid); r.onsuccess = () => res(); r.onerror = () => rej(r.error); });
+  try {
+    await storage.removeFromOutbox(uuid);
+    console.log('Job removed from outbox:', uuid);
+  } catch (error) {
+    console.error('Error removing job from outbox:', error);
+    throw error;
+  }
 }
 
 async function setCursor(val) {
-  const db = await withDB();
-  const t = await tx(db, ['meta'], 'readwrite');
-  await new Promise((res, rej) => { const r = t.objectStore('meta').put({key:'cursor', value: val}); r.onsuccess = () => res(); r.onerror = () => rej(r.error); });
+  try {
+    await storage.setMeta('cursor', val);
+    console.log('Cursor saved to persistent storage:', val);
+  } catch (error) {
+    console.error('Error saving cursor to IndexedDB:', error);
+    // Fallback to localStorage
+    try {
+      localStorage.setItem('sync_cursor', val);
+      console.log('Cursor saved to localStorage as fallback:', val);
+    } catch (fallbackError) {
+      console.error('Fallback cursor save also failed:', fallbackError);
+      // Don't throw error, just log it
+    }
+  }
 }
 
 async function getCursor() {
-  const db = await withDB();
-  const t = await tx(db, ['meta'], 'readonly');
-  return await new Promise((res, rej) => { 
-    const r = t.objectStore('meta').get('cursor'); 
-    r.onsuccess = () => {
-      const cursor = r.result?.value || '';
-      // If no cursor exists, return empty string to start from beginning
-      res(cursor);
-    }; 
-    r.onerror = () => rej(r.error); 
-  });
+  try {
+    const cursor = await storage.getMeta('cursor') || '';
+    console.log('Cursor retrieved from persistent storage:', cursor);
+    return cursor;
+  } catch (error) {
+    console.error('Error getting cursor:', error);
+    // Try to get cursor from localStorage as fallback
+    try {
+      const fallbackCursor = localStorage.getItem('sync_cursor') || '';
+      console.log('Using fallback cursor from localStorage:', fallbackCursor);
+      return fallbackCursor;
+    } catch (fallbackError) {
+      console.error('Fallback cursor also failed:', fallbackError);
+      return ''; // Return empty string as final fallback
+    }
+  }
 }
 
 async function applyChanges(changes) {
@@ -510,32 +561,9 @@ async function syncNow() {
     clearAllBtn.addEventListener('click', async () => {
       if (confirm('Are you sure you want to clear all notes? This action cannot be undone.')) {
         try {
-          const db = await withDB();
-          const t = await tx(db, ['notes', 'outbox', 'meta'], 'readwrite');
-          
-          // Clear all notes
-          await new Promise((res, rej) => {
-            const req = t.objectStore('notes').clear();
-            req.onsuccess = () => res();
-            req.onerror = () => rej(req.error);
-          });
-          
-          // Clear outbox
-          await new Promise((res, rej) => {
-            const req = t.objectStore('outbox').clear();
-            req.onsuccess = () => res();
-            req.onerror = () => rej(req.error);
-          });
-          
-          // Reset cursor
-          await new Promise((res, rej) => {
-            const req = t.objectStore('meta').delete('cursor');
-            req.onsuccess = () => res();
-            req.onerror = () => rej(req.error);
-          });
-          
+          await storage.clearAll();
           await render();
-          console.log('All notes cleared successfully');
+          console.log('All notes cleared successfully from persistent storage');
         } catch (error) {
           console.error('Error clearing notes:', error);
           alert('Error clearing notes. Please try again.');
